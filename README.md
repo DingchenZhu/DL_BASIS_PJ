@@ -240,11 +240,66 @@ model = models.Sequential([
 在这里我们尝试使用128->64->32->16个神经元进行实验，观察性能是否改善
 
 实验结果记录如下：
-1. 256：accuracy: 0.9059 - loss: 0.2398 - val_accuracy: 0.5000 - val_loss: 9.4851
-![img_7.png](img_7.png)
-2. 128：
-3. 64：
-4. 32：
-5. 16：
-##### 卷积核
+1. 256：accuracy: 0.8996 - loss: 0.2422 - val_accuracy: 0.5000 - val_loss: 45.2598
+![img_9.png](img_9.png)
+2. 128：accuracy: 0.9081 - loss: 0.2250 - val_accuracy: 0.5000 - val_loss: 26.4928
+![img_8.png](img_8.png)
+3. 64：accuracy: 0.8921 - loss: 0.2974 - val_accuracy: 0.5000 - val_loss: 22.9473
+![img_11.png](img_11.png)
+4. 32：accuracy: 0.8818 - loss: 0.3160 - val_accuracy: 0.5000 - val_loss: 18.0375
+![img_10.png](img_10.png)
+5. 16：accuracy: 0.8294 - loss: 0.3451 - val_accuracy: 0.5000 - val_loss: 13.4406
+![img_12.png](img_12.png)
 
+##### 卷积核
+在上述调整优化中，我们发现适当减少全连接层的神经元个数，有助于降低验证损失，因此在本部分，我们基于采用dropout后的模型进行卷积核层面的调整优化
+
+本部分实验采用全连接层为32个神经元的模型
+
+**baseline：accuracy: 0.8818 - loss: 0.3160 - val_accuracy: 0.5000 - val_loss: 18.0375**
+
+**基于思想：更少的卷积核会提取更浅更少的特征，不易出现过拟合现象，更小的卷积核感受野更小，学习的特征更少**
+1. 采用 32 + 64 + 128 -->> 32 + 32 + 64结构
+
+   实验结果：
+accuracy: 0.8832 - loss: 0.3016 - val_accuracy: 0.7500 - val_loss: 0.3997
+![img_13.png](img_13.png)
+
+额 看结果 像瞎猫碰到死耗子了
+重新跑一次：
+![img_15.png](img_15.png)
+确实碰到死耗子了。 但是较于baseline，损失降低了
+2. 采用 32 + 32 + 32结构
+![img_16.png](img_16.png)
+实验结果：accuracy: 0.9026 - loss: 0.2205 - val_accuracy: 0.5000 - val_loss: 5.1813
+
+3. 直接对网络动手吧
+
+
+### 模型三
+模型三还是比较友好的，我这里只提供一种修改思路：
+
+我们观察之后看到，模型引入了更深的网络结构，但是其实并没有过拟合，因此在这里考虑修改filter的个数
+
+本人在这里将原代码的最后一个卷积层filter个数从256修改为128
+
+```python
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Flatten(),
+    layers.Dense(256, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+```
+结果也是非常的好
+
+实验结果：accuracy: 0.7695 - loss: 0.4382 - val_accuracy: 0.9375 - val_loss: 0.3469
+截图：
+![img_17.png](img_17.png)
