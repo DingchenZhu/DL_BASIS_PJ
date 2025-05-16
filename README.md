@@ -111,7 +111,6 @@ model = models.Sequential([
     layers.Dense(1, activation='sigmoid')
 ])
 ```
-
 当然，可想而知，结果也是非常的nice！
 ![img_3.png](img_3.png)
 验证准确率也是到达了93.75%
@@ -274,7 +273,40 @@ accuracy: 0.8832 - loss: 0.3016 - val_accuracy: 0.7500 - val_loss: 0.3997
 实验结果：accuracy: 0.9026 - loss: 0.2205 - val_accuracy: 0.5000 - val_loss: 5.1813
 
 3. 直接对网络动手吧
+**基于：更多的 filters + BN = 更强表达能力 + 更快训练，但更容易过拟合**
 
+简单来说，BN在这个小网络中训练太过于激进了，那么就把卷积核变小，同时适当丢弃一定的神经元，并且考虑取消一些BN的操作，以下为优化代码：
+```python
+layers.Conv2D(8, (3, 3), activation='relu', input_shape=(150, 150, 3),
+                      kernel_regularizer=regularizers.l2(0.001)),
+#layers.BatchNormalization(),
+layers.MaxPooling2D((2, 2)),
+
+layers.Conv2D(8, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+#layers.BatchNormalization(),
+layers.MaxPooling2D((2, 2)),
+        
+layers.Conv2D(8, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+#layers.BatchNormalization(),
+layers.MaxPooling2D((2, 2)),
+        
+layers.Conv2D(8, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+layers.BatchNormalization(),
+layers.MaxPooling2D((2, 2)),
+
+layers.Flatten(),
+
+layers.Dense(8, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
+layers.Dense(1, activation='sigmoid')
+```
+实验结果：
+![img_20.png](img_20.png)
+
+你已经很棒了！
+模型二就到这里吧，如果不引入BN的话，这个模型的优化还是很轻松的
 
 ### 模型三
 模型三还是比较友好的，我这里只提供一种修改思路：
