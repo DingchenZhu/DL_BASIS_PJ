@@ -303,3 +303,44 @@ model = models.Sequential([
 实验结果：accuracy: 0.7695 - loss: 0.4382 - val_accuracy: 0.9375 - val_loss: 0.3469
 截图：
 ![img_17.png](img_17.png)
+
+那么如果把网络结构再加深一点呢？
+
+在这里采用两种加深方法(虽然说不可避免地会造成计算量的急剧上升)：
+
+1. 直接加入一层卷积层，
+```python
+    layers.Conv2D(512, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+```
+![img_18.png](img_18.png)
+没有预想的那么好，不过相较于原来的baseline，也是有很大的改进了
+
+2. 将前面所有的卷积层加倍形成卷积块
+```python
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+    layers.MaxPooling2D((2, 2)),
+        
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+        
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+        
+    layers.Conv2D(256, (3, 3), activation='relu'),
+    layers.Conv2D(256, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+        
+    # layers.Conv2D(512, (3, 3), activation='relu'),
+    # layers.Conv2D(512, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+        
+    layers.Flatten(),
+    layers.Dense(256, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+```
+![img_19.png](img_19.png)
